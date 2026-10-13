@@ -1,0 +1,25 @@
+# Multi-stage Dockerfile for ASP.NET Core 8 Web API
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy project files for caching restore layer
+COPY ["src/FoodDelivery.Domain/FoodDelivery.Domain.csproj", "src/FoodDelivery.Domain/"]
+COPY ["src/FoodDelivery.Application/FoodDelivery.Application.csproj", "src/FoodDelivery.Application/"]
+COPY ["src/FoodDelivery.Infrastructure/FoodDelivery.Infrastructure.csproj", "src/FoodDelivery.Infrastructure/"]
+COPY ["src/FoodDelivery.Api/FoodDelivery.Api.csproj", "src/FoodDelivery.Api/"]
+
+RUN dotnet restore "src/FoodDelivery.Api/FoodDelivery.Api.csproj"
+
+# Copy source and publish
+COPY . .
+WORKDIR "/src/src/FoodDelivery.Api"
+RUN dotnet publish "FoodDelivery.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Runtime Image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+EXPOSE 5000
+ENV ASPNETCORE_URLS=http://+:5000
+ENV ASPNETCORE_ENVIRONMENT=Production
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "FoodDelivery.Api.dll"]

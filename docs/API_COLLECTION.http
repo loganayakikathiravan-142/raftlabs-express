@@ -1,0 +1,105 @@
+### Variables
+@baseUrl = http://localhost:5000
+@api = {{baseUrl}}/api/v1
+
+### 1. Health Check Probe
+GET {{baseUrl}}/health
+Accept: application/json
+
+### 2. Get All Food Menu Items
+GET {{api}}/menu
+Accept: application/json
+
+### 3. Filter Menu by Category (e.g., Pizza)
+GET {{api}}/menu?category=Pizza
+Accept: application/json
+
+### 4. Search Menu by Keyword (e.g., Burger)
+GET {{api}}/menu?search=Burger
+Accept: application/json
+
+### 5. Create New Food Order (Valid Happy Path)
+# Replace menuItemId with a valid GUID obtained from the menu endpoint
+POST {{api}}/orders
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customerName": "Jane Doe",
+  "deliveryAddress": "742 Evergreen Terrace, Springfield",
+  "phoneNumber": "+1-555-0199",
+  "items": [
+    {
+      "menuItemId": "00000000-0000-0000-0000-000000000000",
+      "quantity": 2
+    }
+  ]
+}
+
+### 6. Create Order with Invalid Data (Triggers 400 Validation Problem Details)
+POST {{api}}/orders
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customerName": "",
+  "deliveryAddress": "123",
+  "phoneNumber": "not-a-phone",
+  "items": []
+}
+
+### 7. Get Order Details by Internal ID
+GET {{api}}/orders/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+### 8. Track Order by Public Human-Readable Order Number
+GET {{api}}/orders/by-number/ORD-20261013-1234
+Accept: application/json
+
+### 9. Get Paginated Orders Collection (Kitchen Dashboard)
+GET {{api}}/orders?page=1&pageSize=10
+Accept: application/json
+
+### 10. Filter Orders by Status
+GET {{api}}/orders?page=1&pageSize=10&status=OrderReceived
+Accept: application/json
+
+### 11. Advance Order Status to "Preparing"
+PATCH {{api}}/orders/00000000-0000-0000-0000-000000000000/status
+Content-Type: application/json
+Accept: application/json
+
+{
+  "status": "Preparing"
+}
+
+### 12. Advance Order Status to "OutForDelivery"
+PATCH {{api}}/orders/00000000-0000-0000-0000-000000000000/status
+Content-Type: application/json
+Accept: application/json
+
+{
+  "status": "OutForDelivery"
+}
+
+### 13. Mark Order as "Delivered"
+PATCH {{api}}/orders/00000000-0000-0000-0000-000000000000/status
+Content-Type: application/json
+Accept: application/json
+
+{
+  "status": "Delivered"
+}
+
+### 14. Attempt Illegal Status Transition (Triggers 422 Invalid Order Operation)
+PATCH {{api}}/orders/00000000-0000-0000-0000-000000000000/status
+Content-Type: application/json
+Accept: application/json
+
+{
+  "status": "Preparing"
+}
+
+### 15. Delete / Cancel Order (Only Permitted When OrderReceived or Cancelled)
+DELETE {{api}}/orders/00000000-0000-0000-0000-000000000000
+Accept: application/json
