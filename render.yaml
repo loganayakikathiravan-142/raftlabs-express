@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: fooddelivery-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile.backend
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DatabaseProvider
+        value: Sqlite
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=fooddelivery.db
+      # Update Cors__AllowedOrigins__0 with your actual Vercel deployment URL (e.g., https://your-project.vercel.app)
+      - key: Cors__AllowedOrigins__0
+        value: https://your-app.vercel.app
